@@ -1,0 +1,17 @@
+name = "whoop-calendar-sync"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[[kv_namespaces]]
+binding = "WHOOP_TOKENS"
+id = "b78665a478114ce8b5d9fd2ab6018baa"
+
+[vars]
+CALENDAR_ID = "primary"
+
+# Secrets (set via `wrangler secret put <NAME>` — do not put these in this file):
+#   WHOOP_CLIENT_ID
+#   WHOOP_CLIENT_SECRET
+#   GOOGLE_CLIENT_ID
+#   GOOGLE_CLIENT_SECRET
+#   GOOGLE_REFRESH_TOKEN

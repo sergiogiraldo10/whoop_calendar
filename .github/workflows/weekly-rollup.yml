@@ -1,0 +1,32 @@
+name: WHOOP weekly rollup
+
+on:
+  # Monday 11:00 America/New_York = 16:00 UTC (EST) or 15:00 UTC (EDT).
+  # Both fire; jobs/weekly_rollup.py checks the current NY offset and skips the wrong one.
+  schedule:
+    - cron: "0 16 * * 1"
+    - cron: "0 15 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  weekly-rollup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -m jobs.weekly_rollup
+        env:
+          WHOOP_CLIENT_ID: ${{ secrets.WHOOP_CLIENT_ID }}
+          WHOOP_CLIENT_SECRET: ${{ secrets.WHOOP_CLIENT_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
+          CALENDAR_ID: ${{ vars.CALENDAR_ID }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
+          TO_SMS_GATEWAY: ${{ secrets.TO_SMS_GATEWAY }}
