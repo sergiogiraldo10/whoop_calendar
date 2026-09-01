@@ -43,13 +43,19 @@ def map_workout_to_event(workout: dict) -> dict:
         lines = ["Workout score not yet available"]
 
     return {
-        "summary": "Workout",
+        "summary": _workout_summary(workout.get("sport_name")),
         "description": "\n".join(lines),
         "start": {"dateTime": workout["start"]},
         "end": {"dateTime": workout["end"]},
         "colorId": EVENT_COLOR["WORKOUT"],
         "extendedProperties": {"private": {"whoopRecordId": f"workout_{workout['id']}"}},
     }
+
+
+def _workout_summary(sport_name) -> str:
+    if not sport_name:
+        return "Workout"
+    return f"Workout ({sport_name.replace('_', ' ').title()})"
 
 
 def _ms_to_hours(ms: float) -> str:

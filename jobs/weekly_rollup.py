@@ -3,12 +3,12 @@ from datetime import datetime
 from whoop_sync.calendar_client import get_access_token
 from whoop_sync.config import load_job_config
 from whoop_sync.gmail_client import send_email
-from whoop_sync.time_utils import is_target_local_hour, ny_date_range
+from whoop_sync.rollup_state import already_sent_this_week, mark_sent
+from whoop_sync.time_utils import ny_date_range
 from whoop_sync.token_store import RestKVTokenStore
 from whoop_sync.whoop_client import get_valid_access_token, list_recovery, list_sleep, list_workouts
 
 KILOJOULE_TO_CALORIE = 4.184
-TARGET_HOUR = 11  # 11:00 America/New_York
 
 
 def _average(values: list) -> float:
@@ -16,13 +16,17 @@ def _average(values: list) -> float:
 
 
 def main() -> None:
-    if not is_target_local_hour(TARGET_HOUR):
-        print("Not the active DST cron slot for 11:00 America/New_York — skipping.")
-        return
-
     config = load_job_config()
     if not config.to_email:
         print("TO_EMAIL not set — nothing to send, skipping.")
+        return
+
+    # Two cron triggers a day cover both DST offsets, and GitHub can delay a
+    # scheduled run by hours, so we can't gate on wall-clock time like
+    # reconcile.py's idempotent upsert doesn't need to. Sending email/SMS is a
+    # real side effect, so dedup on "already sent this week" instead.
+    if already_sent_this_week(config.cf_account_id, config.cf_namespace_id, config.cf_api_token):
+        print("Already sent this week's rollup — skipping.")
         return
 
     token_store = RestKVTokenStore(config.cf_account_id, config.cf_namespace_id, config.cf_api_token)
@@ -66,6 +70,7 @@ def main() -> None:
         sms_text = f"WHOOP week: recovery {avg_recovery:.1f}%, sleep {avg_sleep_perf:.1f}%, {len(workouts)} workouts"
         send_email(google_access_token, config.to_sms_gateway, "", sms_text)
 
+    mark_sent(config.cf_account_id, config.cf_namespace_id, config.cf_api_token)
     print("Weekly rollup sent.")
 
 

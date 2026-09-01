@@ -1,18 +1,15 @@
 from whoop_sync.calendar_client import get_access_token, upsert_event
 from whoop_sync.config import load_job_config
 from whoop_sync.mappers import map_sleep_to_event, map_workout_to_event
-from whoop_sync.time_utils import is_target_local_hour, ny_date_range
+from whoop_sync.time_utils import ny_date_range
 from whoop_sync.token_store import RestKVTokenStore
 from whoop_sync.whoop_client import get_valid_access_token, list_sleep, list_workouts
 
-TARGET_HOUR = 11  # 11:00 America/New_York
-
 
 def main() -> None:
-    if not is_target_local_hour(TARGET_HOUR):
-        print("Not the active DST cron slot for 11:00 America/New_York — skipping.")
-        return
-
+    # No time-of-day gate here: the calendar upsert is idempotent (keyed on
+    # whoopRecordId), so it's harmless for both daily cron triggers to run —
+    # unlike weekly_rollup.py's email, there's no duplicate-side-effect risk.
     config = load_job_config()
     token_store = RestKVTokenStore(config.cf_account_id, config.cf_namespace_id, config.cf_api_token)
 

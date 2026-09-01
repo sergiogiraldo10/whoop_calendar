@@ -37,13 +37,21 @@ export function mapWorkoutToEvent(workout: WhoopWorkout): CalendarEvent {
     : ["Workout score not yet available"];
 
   return {
-    summary: "Workout",
+    summary: workoutSummary(workout.sport_name),
     description: lines.join("\n"),
     start: { dateTime: workout.start },
     end: { dateTime: workout.end },
     colorId: EVENT_COLOR.WORKOUT,
     extendedProperties: { private: { [WHOOP_RECORD_ID_KEY]: `workout_${workout.id}` } },
   };
+}
+
+function workoutSummary(sportName: string | undefined): string {
+  if (!sportName) return "Workout";
+  const titleCased = sportName
+    .replace(/_/g, " ")
+    .replace(/\w\S*/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+  return `Workout (${titleCased})`;
 }
 
 function msToHours(ms: number): string {

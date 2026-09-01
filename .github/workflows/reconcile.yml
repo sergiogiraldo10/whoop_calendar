@@ -1,11 +1,20 @@
 name: Reconcile WHOOP data
 
 on:
-  # 11:00 America/New_York = 16:00 UTC (EST) or 15:00 UTC (EDT).
-  # Both fire; jobs/reconcile.py checks the current NY offset and skips the wrong one.
+  # Target local times (America/New_York), each given as both its EST and EDT
+  # UTC equivalent since GitHub cron doesn't shift for daylight saving. Firing
+  # twice a day is fine — the calendar upsert in jobs/reconcile.py is idempotent —
+  # and GitHub can delay scheduled runs by hours regardless, so "roughly" these times.
+  #   Mon/Fri  9:00 ET -> 14:00 UTC (EST) / 13:00 UTC (EDT)
+  #   Tue-Thu  7:00 ET -> 12:00 UTC (EST) / 11:00 UTC (EDT)
+  #   Sat/Sun 11:00 ET -> 16:00 UTC (EST) / 15:00 UTC (EDT)
   schedule:
-    - cron: "0 16 * * *"
-    - cron: "0 15 * * *"
+    - cron: "0 14 * * 1,5"
+    - cron: "0 13 * * 1,5"
+    - cron: "0 12 * * 2,3,4"
+    - cron: "0 11 * * 2,3,4"
+    - cron: "0 16 * * 0,6"
+    - cron: "0 15 * * 0,6"
   workflow_dispatch: {}
 
 jobs:

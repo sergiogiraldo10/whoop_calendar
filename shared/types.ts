@@ -34,6 +34,7 @@ export interface WhoopWorkout {
   start: string;
   end: string;
   sport_id: number;
+  sport_name?: string;
   score_state: string;
   score?: {
     strain: number;

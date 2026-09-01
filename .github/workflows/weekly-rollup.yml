@@ -1,8 +1,10 @@
 name: WHOOP weekly rollup
 
 on:
-  # Monday 11:00 America/New_York = 16:00 UTC (EST) or 15:00 UTC (EDT).
-  # Both fire; jobs/weekly_rollup.py checks the current NY offset and skips the wrong one.
+  # Roughly Monday 11:00 America/New_York = 16:00 UTC (EST) or 15:00 UTC (EDT) —
+  # "roughly" because GitHub can delay scheduled runs by hours. Both entries
+  # fire; jobs/weekly_rollup.py dedups via a "last sent" marker in Cloudflare
+  # KV rather than wall-clock time, since sending email/SMS isn't idempotent.
   schedule:
     - cron: "0 16 * * 1"
     - cron: "0 15 * * 1"
