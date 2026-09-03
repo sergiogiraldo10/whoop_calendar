@@ -4,7 +4,7 @@ on:
   # Roughly Monday 11:00 America/New_York = 16:00 UTC (EST) or 15:00 UTC (EDT) —
   # "roughly" because GitHub can delay scheduled runs by hours. Both entries
   # fire; jobs/weekly_rollup.py dedups via a "last sent" marker in Cloudflare
-  # KV rather than wall-clock time, since sending email/SMS isn't idempotent.
+  # KV rather than wall-clock time, since sending email isn't idempotent.
   schedule:
     - cron: "0 16 * * 1"
     - cron: "0 15 * * 1"
@@ -31,4 +31,3 @@ jobs:
           CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
           CALENDAR_ID: ${{ vars.CALENDAR_ID }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
-          TO_SMS_GATEWAY: ${{ secrets.TO_SMS_GATEWAY }}

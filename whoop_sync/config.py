@@ -26,7 +26,6 @@ class JobConfig:
     cf_namespace_id: str
     calendar_id: str
     to_email: Optional[str]
-    to_sms_gateway: Optional[str]
 
 
 def load_job_config() -> JobConfig:
@@ -41,5 +40,4 @@ def load_job_config() -> JobConfig:
         cf_namespace_id=_required("CF_KV_NAMESPACE_ID"),
         calendar_id=os.environ.get("CALENDAR_ID", "primary"),
         to_email=os.environ.get("TO_EMAIL"),
-        to_sms_gateway=os.environ.get("TO_SMS_GATEWAY"),
     )

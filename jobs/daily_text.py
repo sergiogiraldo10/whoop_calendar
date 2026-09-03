@@ -13,8 +13,8 @@ STEPS_AVERAGE_WINDOW_DAYS = 7
 
 def main() -> None:
     config = load_job_config()
-    if not config.to_email and not config.to_sms_gateway:
-        print("Neither TO_EMAIL nor TO_SMS_GATEWAY set — nothing to send, skipping.")
+    if not config.to_email:
+        print("TO_EMAIL not set — nothing to send, skipping.")
         return
 
     token_store = RestKVTokenStore(config.cf_account_id, config.cf_namespace_id, config.cf_api_token)
@@ -46,10 +46,7 @@ def main() -> None:
     google_access_token = get_access_token(
         config.google_client_id, config.google_client_secret, config.google_refresh_token
     )
-    if config.to_sms_gateway:
-        send_email(google_access_token, config.to_sms_gateway, "", text)
-    if config.to_email:
-        send_email(google_access_token, config.to_email, "WHOOP Daily Summary", text)
+    send_email(google_access_token, config.to_email, "WHOOP Daily Summary", text)
 
     print("Daily text sent.")
 

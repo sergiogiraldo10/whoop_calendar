@@ -31,4 +31,3 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
-          TO_SMS_GATEWAY: ${{ secrets.TO_SMS_GATEWAY }}

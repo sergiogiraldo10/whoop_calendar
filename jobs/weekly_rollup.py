@@ -23,7 +23,7 @@ def main() -> None:
 
     # Two cron triggers a day cover both DST offsets, and GitHub can delay a
     # scheduled run by hours, so we can't gate on wall-clock time like
-    # reconcile.py's idempotent upsert doesn't need to. Sending email/SMS is a
+    # reconcile.py's idempotent upsert doesn't need to. Sending email is a
     # real side effect, so dedup on "already sent this week" instead.
     if already_sent_this_week(config.cf_account_id, config.cf_namespace_id, config.cf_api_token):
         print("Already sent this week's rollup — skipping.")
@@ -65,10 +65,6 @@ def main() -> None:
         config.google_client_id, config.google_client_secret, config.google_refresh_token
     )
     send_email(google_access_token, config.to_email, "WHOOP Weekly Rollup", summary_text)
-
-    if config.to_sms_gateway:
-        sms_text = f"WHOOP week: recovery {avg_recovery:.1f}%, sleep {avg_sleep_perf:.1f}%, {len(workouts)} workouts"
-        send_email(google_access_token, config.to_sms_gateway, "", sms_text)
 
     mark_sent(config.cf_account_id, config.cf_namespace_id, config.cf_api_token)
     print("Weekly rollup sent.")
