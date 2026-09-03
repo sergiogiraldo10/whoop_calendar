@@ -12,11 +12,20 @@ export interface Env {
   GOOGLE_CLIENT_SECRET: string;
   GOOGLE_REFRESH_TOKEN: string;
   CALENDAR_ID: string;
+  STEPS_INGEST_SECRET: string;
 }
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    if (request.method !== "POST" || new URL(request.url).pathname !== "/webhook") {
+    const path = new URL(request.url).pathname;
+
+    if (request.method === "POST" && path === "/steps") {
+      return handleStepsIngest(request, env);
+    }
+
+    if (request.method !== "POST" || path !== "/webhook") {
       return new Response("Not found", { status: 404 });
     }
 
@@ -36,6 +45,21 @@ export default {
     return new Response("ok", { status: 200 });
   },
 };
+
+/** Called by an Apple Shortcuts personal automation on the phone — not by WHOOP or Google. */
+async function handleStepsIngest(request: Request, env: Env): Promise<Response> {
+  if (request.headers.get("X-Steps-Secret") !== env.STEPS_INGEST_SECRET) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  const body = (await request.json()) as { date?: string; steps?: number };
+  if (!body.date || !DATE_RE.test(body.date) || typeof body.steps !== "number") {
+    return new Response("Expected JSON body { date: 'YYYY-MM-DD', steps: number }", { status: 400 });
+  }
+
+  await env.WHOOP_TOKENS.put(`steps:${body.date}`, String(Math.round(body.steps)));
+  return new Response("ok", { status: 200 });
+}
 
 async function processWebhook(payload: WhoopWebhookPayload, env: Env): Promise<void> {
   if (payload.type !== "sleep.updated" && payload.type !== "workout.updated") {

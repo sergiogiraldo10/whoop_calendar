@@ -15,3 +15,4 @@ CALENDAR_ID = "primary"
 #   GOOGLE_CLIENT_ID
 #   GOOGLE_CLIENT_SECRET
 #   GOOGLE_REFRESH_TOKEN
+#   STEPS_INGEST_SECRET  (any random string you make up — the Apple Shortcut sends it back to prove it's really your Shortcut)
